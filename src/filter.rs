@@ -13,7 +13,7 @@ pub fn filter(block_list: &Vec<String>, buf: &[u8]) -> String {
     });
 
     let result = result_itr.collect::<Vec<&str>>().join("\n");
-    
+
     return result;
 }
 
@@ -28,7 +28,6 @@ mod tests {
         let result = filter(&block_list, &statsd_str_bytes);
         assert_eq!("foo:1|c\nfoo:2|c\nfoo:3|c", result);
     }
-
 
     #[test]
     fn test_should_not_block_single_metric() {
