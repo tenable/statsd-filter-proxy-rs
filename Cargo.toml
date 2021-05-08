@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 bytes = "1.0.1"
 futures-util = { version = "0.3.8", default-features = false, features = ["std"] }
-tokio = { version = "1.4.0", features = ["macros", "net", "rt-multi-thread"] }
+tokio = { version = "1.5.0", features = ["macros", "net", "rt-multi-thread"] }
 tokio-util = { version = "0.6.5", features = ["codec", "net"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
@@ -18,6 +18,7 @@ env_logger = "0.8.3"
 
 [dev-dependencies]
 criterion = "0.3.4"
+tokio = { version = "1.5.0", features = ["full"] }
 
 [[bench]]
 name = "filter_bench"
@@ -25,4 +26,8 @@ harness = false
 
 [[bench]]
 name = "codec_bench"
+harness = false
+
+[[bench]]
+name = "integration_bench"
 harness = false
