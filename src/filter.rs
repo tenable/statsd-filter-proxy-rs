@@ -1,3 +1,4 @@
+use bytes::{BufMut, Bytes, BytesMut};
 use std::str;
 
 pub fn filter(block_list: &Vec<String>, buf: &[u8]) -> String {
@@ -15,6 +16,22 @@ pub fn filter(block_list: &Vec<String>, buf: &[u8]) -> String {
     let result = result_itr.collect::<Vec<&str>>().join("\n");
 
     return result;
+}
+
+pub fn filter_2(block_list: &[Bytes], data: &[u8]) -> Bytes {
+    let mut buffer = BytesMut::with_capacity(data.len());
+
+    'outer: for line in data.split(|x| x == &b'\n') {
+        for prefix in block_list {
+            if line.starts_with(prefix) {
+                continue 'outer;
+            }
+        }
+
+        buffer.put(line);
+    }
+
+    buffer.freeze()
 }
 
 #[cfg(test)]

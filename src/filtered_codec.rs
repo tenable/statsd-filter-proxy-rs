@@ -1,9 +1,8 @@
 use bytes::{BufMut, Bytes, BytesMut};
-use std::collections::BTreeSet;
 use tokio_util::codec::Decoder;
 
 pub struct FilteredCodec {
-    pub block_list: BTreeSet<Bytes>,
+    pub block_list: Vec<Bytes>,
 }
 
 impl Decoder for FilteredCodec {
@@ -11,19 +10,26 @@ impl Decoder for FilteredCodec {
     type Error = std::io::Error;
 
     fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
-        let mut buffer = BytesMut::new();
+        let data = match src.iter().rposition(|c| c == &b'\n') {
+            Some(pos) => src.split_to(pos + 1),
+            None => return Ok(None),
+        };
 
-        while let Some(datagram) = get_datagram(src) {
-            let tag = match datagram.iter().position(|x| x == &b':') {
-                Some(pos) => &datagram[..pos],
-                None => &datagram[..],
-            };
+        let mut buffer = BytesMut::with_capacity(data.len());
 
-            if self.block_list.contains(tag) {
+        'outer: for line in data[..].split(|x| x == &b'\n') {
+            if line.is_empty() {
                 continue;
             }
 
-            buffer.put(datagram);
+            for prefix in &self.block_list {
+                if line.starts_with(prefix) {
+                    continue 'outer;
+                }
+            }
+
+            buffer.put(line);
+            buffer.put_u8(b'\n');
         }
 
         Ok(if buffer.is_empty() {
@@ -32,12 +38,6 @@ impl Decoder for FilteredCodec {
             Some(buffer)
         })
     }
-}
-
-fn get_datagram(src: &mut BytesMut) -> Option<BytesMut> {
-    src.iter()
-        .position(|c| c == &b'\n')
-        .map(|pos| src.split_to(pos + 1))
 }
 
 #[cfg(test)]

@@ -4,7 +4,7 @@ use statsd_filter_proxy_rs::filtered_codec::FilteredCodec;
 use tokio_util::codec::Decoder;
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("Filter benchmark", |b| {
+    c.bench_function("Codec benchmark", |b| {
         b.iter_custom(|iters| {
             let block_list = black_box(vec![
                 String::from("foo"),
@@ -23,7 +23,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                 block_list: block_list.into_iter().map(Bytes::from).collect(),
             };
 
-            let data = black_box(b"notfoo:1|c\nfoo:2|c\nnotfoo:3|c\n");
+            let data = black_box(b"notfoo:1|c\nfoo:2|c\nnotfoo:3|c\nnotfoo:1|c\nfoo:2|c\nnotfoo:3|c\nnotfoo:1|c\nfoo:2|c\nnotfoo:3|c\nnotfoo:1|c\nfoo:2|c\nnotfoo:3|c\nnotfoo:1|c\nfoo:2|c\nnotfoo:3|c\n");
 
             let mut duration = std::time::Duration::from_secs(0);
 
@@ -43,7 +43,7 @@ fn criterion_benchmark(c: &mut Criterion) {
 
 fn filter_bench() {
     let mut c = Criterion::default()
-        .measurement_time(std::time::Duration::from_secs(60))
+        .measurement_time(std::time::Duration::from_secs(10))
         .sample_size(1000);
 
     criterion_benchmark(&mut c);
