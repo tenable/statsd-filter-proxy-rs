@@ -29,6 +29,7 @@ pub fn filter_2(block_list: &[Bytes], data: &[u8]) -> Bytes {
         }
 
         buffer.put(line);
+        buffer.put_u8(b'\n');
     }
 
     buffer.freeze()
@@ -44,6 +45,10 @@ mod tests {
         let statsd_str_bytes = "foo:1|c\nfoo:2|c\nfoo:3|c".as_bytes();
         let result = filter(&block_list, &statsd_str_bytes);
         assert_eq!("foo:1|c\nfoo:2|c\nfoo:3|c", result);
+
+        let block_list = block_list.into_iter().map(Bytes::from).collect::<Vec<_>>();
+        let result = filter_2(&block_list, &statsd_str_bytes);
+        assert_eq!("foo:1|c\nfoo:2|c\nfoo:3|c\n", result);
     }
 
     #[test]
@@ -52,6 +57,10 @@ mod tests {
         let statsd_str_bytes = "foo:1|c".as_bytes();
         let result = filter(&block_list, &statsd_str_bytes);
         assert_eq!("foo:1|c", result);
+
+        let block_list = block_list.into_iter().map(Bytes::from).collect::<Vec<_>>();
+        let result = filter_2(&block_list, &statsd_str_bytes);
+        assert_eq!("foo:1|c\n", result);
     }
 
     #[test]
@@ -59,6 +68,10 @@ mod tests {
         let block_list = vec![String::from("foo"), String::from("otherfoo")];
         let statsd_str_bytes = "foo:1|c".as_bytes();
         let result = filter(&block_list, &statsd_str_bytes);
+        assert_eq!("", result);
+
+        let block_list = block_list.into_iter().map(Bytes::from).collect::<Vec<_>>();
+        let result = filter_2(&block_list, &statsd_str_bytes);
         assert_eq!("", result);
     }
 
@@ -68,6 +81,10 @@ mod tests {
         let statsd_str_bytes = "foo:1|c\nfoo:2|c\nfoo:3|c".as_bytes();
         let result = filter(&block_list, &statsd_str_bytes);
         assert_eq!("", result);
+
+        let block_list = block_list.into_iter().map(Bytes::from).collect::<Vec<_>>();
+        let result = filter_2(&block_list, &statsd_str_bytes);
+        assert_eq!("", result);
     }
 
     #[test]
@@ -76,5 +93,9 @@ mod tests {
         let statsd_str_bytes = "notfoo:1|c\nfoo:2|c\nnotfoo:3|c".as_bytes();
         let result = filter(&block_list, &statsd_str_bytes);
         assert_eq!("notfoo:1|c\nnotfoo:3|c", result);
+
+        let block_list = block_list.into_iter().map(Bytes::from).collect::<Vec<_>>();
+        let result = filter_2(&block_list, &statsd_str_bytes);
+        assert_eq!("notfoo:1|c\nnotfoo:3|c\n", result);
     }
 }
