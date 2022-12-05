@@ -7,9 +7,27 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-thread-id = { version = "4" }
+bytes = "1.0.1"
+futures-util = { version = "0.3.8", default-features = false, features = ["std"] }
+tokio = { version = "1.5.0", features = ["macros", "net", "rt-multi-thread"] }
+tokio-util = { version = "0.6.5", features = ["codec", "net"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
-log = { version = "0.4" }
+log = "0.4"
 env_logger = "0.8.3"
+
+[dev-dependencies]
+criterion = "0.3.4"
+tokio = { version = "1.5.0", features = ["full"] }
+
+[[bench]]
+name = "filter_bench"
+harness = false
+
+[[bench]]
+name = "codec_bench"
+harness = false
+
+[[bench]]
+name = "integration_bench"
+harness = false
